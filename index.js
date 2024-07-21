@@ -4,9 +4,12 @@ const dotenv = require('dotenv');
 const app = express()
 const port = 8000
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const filePath = path.join(__dirname, 'profile.json');
 
 dotenv.config();
-const geminiAPI = new GoogleGenerativeAI('');
+const geminiAPI = new GoogleGenerativeAI('AIzaSyAzeEalzQZbonaJbSL2uOQEU0tx5-8oR4A');
 
 const HOMEPAGE_PROMPT = `
 Top 5 government schemes with high public interest or social impact India using this JSON schema:
@@ -23,6 +26,7 @@ const ELIGIBILITY_CHECK_PROMPT = `
 Check the eligibility of the government scheme for the above profile using this JSON scheme:
 { "type": "object",
   "properties": {
+    "schemeName": { "type": "string" },
     "eligibility": { "type": "boolean" },
     "reason": { "type": "string" }
   }
@@ -34,6 +38,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
+/**
+ * Search API to get featured schemes
+ */
 app.get('/search', async (req, res) => {
   try {
     const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
@@ -61,6 +68,83 @@ app.post('/chat', async (req, res) => {
   res.status(201).send(JSON.parse(text));
 });
 
+/**
+ * Get Profiles for an user
+ */
+app.get('/getProfiles/:userName', (req, res) => {
+  const key = req.params.userName;
+  const data = readJsonFile(filePath);
+
+  if (data && data[key] && Array.isArray(data[key])) {
+    res.json(data[key]);
+  } else {
+    res.status(404).json({ message: `${key} is missing or not an array.` });
+  }
+});
+
+/**
+ * Add a new profile
+ */
+app.post('/addProfile/:userName', (req, res) => {
+  const key = req.params.userName;
+  const newEntry = req.body;
+  const data = readJsonFile(filePath);
+
+  if (data && data[key] && Array.isArray(data[key])) {
+    data[key].push(newEntry);
+    writeJsonFile(filePath, data);
+    res.status(201).json({ message: 'New entry added successfully' });
+  } else {
+    res.status(404).json({ message: `${key} key is missing or not an array.` });
+  }
+});
+
+/**
+ * Update profile
+ */
+app.put('/updateProfile/:userName/:profileName', (req, res) => {
+  const key = req.params.userName;
+  const id = req.params.profileName;
+  const updatedEntry = req.body;
+  const data = readJsonFile(filePath);
+
+  if (data && data[key] && Array.isArray(data[key])) {
+    const entries = data[key];
+    const entryIndex = entries.findIndex(entry => entry.id === id);
+
+    if (entryIndex !== -1) {
+      entries[entryIndex] = { ...entries[entryIndex], ...updatedEntry };
+      writeJsonFile(filePath, data);
+      res.json({ message: 'Entry updated successfully' });
+    } else {
+      res.status(404).json({ message: `Entry with id ${id} not found.` });
+    }
+  } else {
+    res.status(404).json({ message: `${key} key is missing or not an array.` });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
+
+
+const readJsonFile = (filePath) => {
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    console.error('Error reading the file:', err);
+    return null;
+  }
+};
+
+const writeJsonFile = (filePath, data) => {
+  try {
+    const jsonData = JSON.stringify(data, null, 2);
+    fs.writeFileSync(filePath, jsonData, 'utf8');
+    console.log('File written successfully');
+  } catch (err) {
+    console.error('Error writing the file:', err);
+  }
+};

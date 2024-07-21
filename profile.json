@@ -1,0 +1,40 @@
+    {
+        "sakthi_anand": [
+            {
+                "id": "Self",
+                "text": "Self",
+                "occupation": "Government Employee",
+                "gender": "male",
+                "age": 27,
+                "location": "Chennai",
+                "monthly_income": 1000000,
+                "marital_status": "Single",
+                "number_of_dependents": 2,
+                "disability_status": "None"
+            },
+            {
+                "id": "Mother",
+                "text": "Mother",
+                "occupation": "Government Employee",
+                "gender": "female",
+                "age": 27,
+                "location": "Chennai",
+                "monthly_income": 10000,
+                "marital_status": "Married",
+                "number_of_dependents": 2,
+                "disability_status": "None"
+            },
+            {
+                "id": "Father",
+                "text": "Father",
+                "occupation": "Government Employee",
+                "gender": "male",
+                "age": 50,
+                "location": "USA",
+                "monthly_income": 100000,
+                "marital_status": "Married",
+                "number_of_dependents": 2,
+                "disability_status": "None"
+            }
+        ]
+    }
