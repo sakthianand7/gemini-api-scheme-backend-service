@@ -9,7 +9,7 @@ const path = require('path');
 const filePath = path.join(__dirname, 'profile.json');
 
 dotenv.config();
-const geminiAPI = new GoogleGenerativeAI('AIzaSyAzeEalzQZbonaJbSL2uOQEU0tx5-8oR4A');
+const geminiAPI = new GoogleGenerativeAI('');
 
 const HOMEPAGE_PROMPT = `
 Top 5 government schemes with high public interest or social impact India using this JSON schema:
@@ -23,7 +23,7 @@ Top 5 government schemes with high public interest or social impact India using 
 }`;
 
 const ELIGIBILITY_CHECK_PROMPT = `
-Check the eligibility of the government scheme for the above profile using this JSON scheme:
+Check the eligibility of the government scheme for the above profile(check the country first) using this JSON scheme:
 { "type": "object",
   "properties": {
     "schemeName": { "type": "string" },
@@ -37,6 +37,14 @@ app.use(cors({
   origin: 'http://localhost:3000'
 }));
 app.use(express.json());
+
+const chatModel = geminiAPI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const chat = chatModel.startChat({
+  history: [],
+  generationConfig: {
+    maxOutputTokens: 500
+  }
+});
 
 /**
  * Search API to get featured schemes
@@ -54,7 +62,17 @@ app.get('/search', async (req, res) => {
     res.status(500).send("Error processing your request");
   }
 });
+
 app.post('/chat', async (req, res) => {
+  console.log(req.body);
+  const message = req.body.message
+  const result = await chat.sendMessage(message);
+  const response = await result.response;
+  const text = await response.text();
+  res.status(201).send(text);
+});
+
+app.post('/checkEligibility', async (req, res) => {
   const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
   const data = req.body;
   const prompt = JSON.stringify(data) + "," + ELIGIBILITY_CHECK_PROMPT;
