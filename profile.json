@@ -1,43 +1,60 @@
+{
+  "sakthi_anand": [
     {
-        "sakthi_anand": [
-            {
-                "id": "Self",
-                "text": "Self",
-                "occupation": "Government Employee",
-                "gender": "male",
-                "age": 27,
-                "country": "India",
-                "location": "Chennai",
-                "monthly_income": 1000000,
-                "marital_status": "Single",
-                "number_of_dependents": 2,
-                "disability_status": "None"
-            },
-            {
-                "id": "Mother",
-                "text": "Mother",
-                "occupation": "Government Employee",
-                "gender": "female",
-                "age": 27,
-                "country": "India",
-                "location": "Chennai",
-                "monthly_income": 10000,
-                "marital_status": "Married",
-                "number_of_dependents": 2,
-                "disability_status": "None"
-            },
-            {
-                "id": "Father",
-                "text": "Father",
-                "occupation": "Government Employee",
-                "gender": "male",
-                "age": 50,
-                "country": "USA",
-                "location": "California",
-                "monthly_income": 100000,
-                "marital_status": "Married",
-                "number_of_dependents": 2,
-                "disability_status": "None"
-            }
-        ]
+      "id": "Self",
+      "text": "Self",
+      "occupation": "Government Employee",
+      "gender": "Male",
+      "age": "26",
+      "country": "India",
+      "location": "Chennai",
+      "monthly_income": "10000",
+      "marital_status": "Single",
+      "number_of_dependents": "2",
+      "disability_status": "Not Disabled",
+      "name": "Self"
+    },
+    {
+      "id": "Mother",
+      "text": "Mother",
+      "occupation": "Government Employee",
+      "gender": "Female",
+      "age": "47",
+      "country": "India",
+      "location": "Chennai",
+      "monthly_income": "10000",
+      "marital_status": "Married",
+      "number_of_dependents": "2",
+      "disability_status": "Not Disabled",
+      "name": "Mother"
+    },
+    {
+      "id": "Father",
+      "text": "Father",
+      "occupation": "Government Employee",
+      "gender": "Male",
+      "age": "50",
+      "country": "USA",
+      "location": "California",
+      "monthly_income": "10000",
+      "marital_status": "Married",
+      "number_of_dependents": "2",
+      "disability_status": "Not Disabled",
+      "name": "Father"
+    },
+    {
+      "id": "Sister",
+      "name": "Sister",
+      "gender": "Female",
+      "age": "24",
+      "occupation": "Private Sector",
+      "country": "India",
+      "location": "Chennai",
+      "monthly_income": "20000",
+      "marital_status": "Single",
+      "number_of_dependents": "2",
+      "disability_status": "Not Disabled",
+      "text": "Sister"
     }
+  ]
+}
