@@ -59,6 +59,20 @@ const chat = chatModel.startChat({
   }
 });
 
+app.get('/feedProfile', async (req, res) => {
+  try {
+    const profile = readJsonFile(filePath);
+    const result = await chat.sendMessage("Remember these profiles" + JSON.stringify(profile));
+    const response = await result.response;
+    const text = await response.text();
+    res.status(201).send(text);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error processing your request");
+  }
+});
+
+
 /**
  * Search API to get featured schemes
  */
