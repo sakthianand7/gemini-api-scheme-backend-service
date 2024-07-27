@@ -23,7 +23,7 @@ Top 5 government schemes with high public interest or social impact India using 
 }`;
 
 const ELIGIBILITY_CHECK_PROMPT = `
-Check the eligibility of the government scheme for the above profile(check the country first) using this JSON scheme:
+Check the eligibility of the government scheme for the above profile(check all the fields) using this JSON scheme:
 { "type": "object",
   "properties": {
     "schemeName": { "type": "string" },
@@ -32,6 +32,19 @@ Check the eligibility of the government scheme for the above profile(check the c
   }
 }
 `
+const SEARCH_QUERY_PROMPT = `
+multiple matching schemes for the query mentioned in the above json for the above profile using this JSON scheme:
+{ "type": "object",
+  "properties": {
+    "schemeWebsiteUrl" : {"type": "string"},
+    "schemeName": { "type": "string" },
+    "schemeDetails" : {"type": "string"},
+    "eligible": { "type": "boolean" },
+    "reason": { "type": "string" }
+  }
+}
+`
+
 
 app.use(cors({
   origin: 'http://localhost:3000'
@@ -64,7 +77,6 @@ app.get('/search', async (req, res) => {
 });
 
 app.post('/chat', async (req, res) => {
-  console.log(req.body);
   const message = req.body.message
   const result = await chat.sendMessage(message);
   const response = await result.response;
@@ -76,13 +88,22 @@ app.post('/checkEligibility', async (req, res) => {
   const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
   const data = req.body;
   const prompt = JSON.stringify(data) + "," + ELIGIBILITY_CHECK_PROMPT;
-  console.log(prompt);
   const result = await model.generateContent(prompt);
   const response = await result.response;
   const text = response.text();
+  res.status(201).send(JSON.parse(text));
+});
 
-  console.log('Received data:', response.text());
-
+app.post('/searchScheme', async (req, res) => {
+  const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
+  const data = req.body;
+  const prompt = JSON.stringify(data) + "," + SEARCH_QUERY_PROMPT;
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  let text = response.text();
+  if(!text.startsWith("[")){
+    text = "[" + text + "]";
+  }
   res.status(201).send(JSON.parse(text));
 });
 
@@ -116,6 +137,7 @@ app.post('/addProfile/:userName', (req, res) => {
     res.status(404).json({ message: `${key} key is missing or not an array.` });
   }
 });
+
 
 /**
  * Update profile
