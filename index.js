@@ -139,6 +139,18 @@ app.post('/searchScheme', async (req, res) => {
   res.status(201).send(JSON.parse(text));
 });
 
+app.post('/compareSchemes', async (req, res) => {
+  const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
+  const data = req.body;
+  const prompt = JSON.stringify(data) + "," + "detailed Comparison of these schemes and return in json with key for each json is the scheme name";
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  let text = response.text();
+  console.log(text);
+  res.status(201).send(JSON.parse(text));
+});
+
+
 /**
  * Get Profiles for an user
  */

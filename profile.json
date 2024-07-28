@@ -69,6 +69,20 @@
       "disability_status": "Not Disabled",
       "text": "Brother",
       "id": "Brother"
+    },
+    {
+      "name": "Cousin",
+      "gender": "Male",
+      "age": "21",
+      "occupation": "Student",
+      "country": "India",
+      "location": "Chennai",
+      "monthly_income": "0",
+      "marital_status": "Single",
+      "number_of_dependents": "0",
+      "disability_status": "Not Disabled",
+      "text": "Cousin",
+      "id": "Cousin"
     }
   ]
 }
