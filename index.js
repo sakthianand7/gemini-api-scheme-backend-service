@@ -51,6 +51,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
+
+/**
+ * Model for chat
+ */
 const chatModel = geminiAPI.getGenerativeModel({ model: "gemini-1.5-flash" });
 const chat = chatModel.startChat({
   history: [],
@@ -58,6 +62,10 @@ const chat = chatModel.startChat({
     maxOutputTokens: 500
   }
 });
+
+/**
+ * Feeds the available to Gemini chat
+ */
 
 app.get('/feedProfile', async (req, res) => {
   try {
@@ -70,6 +78,18 @@ app.get('/feedProfile', async (req, res) => {
     console.error(error);
     res.status(500).send("Error processing your request");
   }
+});
+
+/**
+ * Chat functionality
+ */
+
+app.post('/chat', async (req, res) => {
+  const message = req.body.message
+  const result = await chat.sendMessage(message);
+  const response = await result.response;
+  const text = await response.text();
+  res.status(201).send(text);
 });
 
 
@@ -90,14 +110,9 @@ app.get('/search', async (req, res) => {
   }
 });
 
-app.post('/chat', async (req, res) => {
-  const message = req.body.message
-  const result = await chat.sendMessage(message);
-  const response = await result.response;
-  const text = await response.text();
-  res.status(201).send(text);
-});
-
+/**
+ * Check eligibility of featured schemes
+ */
 app.post('/checkEligibility', async (req, res) => {
   const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
   const data = req.body;
@@ -108,6 +123,9 @@ app.post('/checkEligibility', async (req, res) => {
   res.status(201).send(JSON.parse(text));
 });
 
+/**
+ * Search schemes for a profile
+ */
 app.post('/searchScheme', async (req, res) => {
   const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
   const data = req.body;
@@ -115,7 +133,7 @@ app.post('/searchScheme', async (req, res) => {
   const result = await model.generateContent(prompt);
   const response = await result.response;
   let text = response.text();
-  if(!text.startsWith("[")){
+  if (!text.startsWith("[")) {
     text = "[" + text + "]";
   }
   res.status(201).send(JSON.parse(text));
@@ -178,11 +196,20 @@ app.put('/updateProfile/:userName/:profileName', (req, res) => {
   }
 });
 
+/**
+ * Start the server
+ */
+
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
 
 
+/**
+ * Utility method to read from JSON
+ * @param {*} filePath file
+ * @returns JSON
+ */
 const readJsonFile = (filePath) => {
   try {
     const data = fs.readFileSync(filePath, 'utf8');
@@ -192,6 +219,12 @@ const readJsonFile = (filePath) => {
     return null;
   }
 };
+
+/**
+ * Utility function to write data into a JSON fil
+ * @param {*} filePath file path
+ * @param {*} data data to write
+ */
 
 const writeJsonFile = (filePath, data) => {
   try {
