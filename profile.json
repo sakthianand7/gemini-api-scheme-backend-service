@@ -83,6 +83,20 @@
       "disability_status": "Not Disabled",
       "text": "Cousin",
       "id": "Cousin"
+    },
+    {
+      "name": "Grandfather",
+      "gender": "Male",
+      "age": "80",
+      "occupation": "Retired school teacher",
+      "country": "India",
+      "location": "Chennai",
+      "monthly_income": "20000",
+      "marital_status": "Married",
+      "number_of_dependents": "3",
+      "disability_status": "Not Disabled",
+      "text": "Grandfather",
+      "id": "Grandfather"
     }
   ]
 }

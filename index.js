@@ -6,45 +6,12 @@ const port = 8000
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const { COMPARE_SCHEME_PROMPT, HOMEPAGE_PROMPT, ELIGIBILITY_CHECK_PROMPT, SEARCH_QUERY_PROMPT } = require('./prompts');
+const { HOME_PAGE_CONTENT_SCHEMA, ELIGIBILITY_CHECK_SCHEMA, SEARCH_QUERY_SCHEMA } = require('./schema');
 const filePath = path.join(__dirname, 'profile.json');
 
 dotenv.config();
 const geminiAPI = new GoogleGenerativeAI('');
-
-const HOMEPAGE_PROMPT = `
-Top 5 government schemes with high public interest or social impact India using this JSON schema:
-{ "type": "object",
-  "properties": {
-    "name": { "type": "string" },
-    "description": { "type": "string" },
-    "eligibility": { "type": "string" },
-    "website_url": { "type": "string" }
-  }
-}`;
-
-const ELIGIBILITY_CHECK_PROMPT = `
-Check the eligibility of the government scheme for the above profile(check all the fields) using this JSON scheme:
-{ "type": "object",
-  "properties": {
-    "schemeName": { "type": "string" },
-    "eligibility": { "type": "boolean" },
-    "reason": { "type": "string" }
-  }
-}
-`
-const SEARCH_QUERY_PROMPT = `
-multiple matching schemes for the query mentioned in the above json for the above profile using this JSON scheme:
-{ "type": "object",
-  "properties": {
-    "schemeWebsiteUrl" : {"type": "string"},
-    "schemeName": { "type": "string" },
-    "schemeDetails" : {"type": "string"},
-    "eligible": { "type": "boolean" },
-    "reason": { "type": "string" }
-  }
-}
-`
-
 
 app.use(cors({
   origin: 'http://localhost:3000'
@@ -59,12 +26,12 @@ const chatModel = geminiAPI.getGenerativeModel({ model: "gemini-1.5-flash" });
 const chat = chatModel.startChat({
   history: [],
   generationConfig: {
-    maxOutputTokens: 500
+    maxOutputTokens: 1000
   }
 });
 
 /**
- * Feeds the available to Gemini chat
+ * Feeds the available profiles to Gemini chat
  */
 
 app.get('/feedProfile', async (req, res) => {
@@ -99,7 +66,7 @@ app.post('/chat', async (req, res) => {
 app.get('/search', async (req, res) => {
   try {
     const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
-    const result = await model.generateContent(HOMEPAGE_PROMPT);
+    const result = await model.generateContent(HOMEPAGE_PROMPT + HOME_PAGE_CONTENT_SCHEMA);
     const response = await result.response;
     let text = "[" + response.text() + "]";
     let schemes = JSON.parse(text);
@@ -116,7 +83,7 @@ app.get('/search', async (req, res) => {
 app.post('/checkEligibility', async (req, res) => {
   const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
   const data = req.body;
-  const prompt = JSON.stringify(data) + "," + ELIGIBILITY_CHECK_PROMPT;
+  const prompt = JSON.stringify(data) + "," + ELIGIBILITY_CHECK_PROMPT + ELIGIBILITY_CHECK_SCHEMA;
   const result = await model.generateContent(prompt);
   const response = await result.response;
   const text = response.text();
@@ -129,7 +96,7 @@ app.post('/checkEligibility', async (req, res) => {
 app.post('/searchScheme', async (req, res) => {
   const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
   const data = req.body;
-  const prompt = JSON.stringify(data) + "," + SEARCH_QUERY_PROMPT;
+  const prompt = JSON.stringify(data) + "," + SEARCH_QUERY_PROMPT + SEARCH_QUERY_SCHEMA;
   const result = await model.generateContent(prompt);
   const response = await result.response;
   let text = response.text();
@@ -139,14 +106,17 @@ app.post('/searchScheme', async (req, res) => {
   res.status(201).send(JSON.parse(text));
 });
 
+/**
+ * Compare two schemes
+ */
+
 app.post('/compareSchemes', async (req, res) => {
   const model = geminiAPI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
   const data = req.body;
-  const prompt = JSON.stringify(data) + "," + "detailed Comparison of these schemes and return in json with key for each json is the scheme name";
+  const prompt = JSON.stringify(data) + "," + COMPARE_SCHEME_PROMPT;
   const result = await model.generateContent(prompt);
   const response = await result.response;
   let text = response.text();
-  console.log(text);
   res.status(201).send(JSON.parse(text));
 });
 
